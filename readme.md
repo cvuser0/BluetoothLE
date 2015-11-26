@@ -1,6 +1,31 @@
-Bluetooth LE Cordova Plugin
+This is a custom modification of Bluetooth LE Cordova Plugin
 
 ====================
+
+# about this fork #
+
+1. i suck at making readme.md's.
+2. i modified an existing plugin to fit my needs and i figured i should share.
+3. i added some stuff  and i barely tested it, i expect it to generally work but i'm not sure.
+4. i changed the whole way in which you call the plugin (bluetoothle.subscribe(<callback>,<callback>,{<params>}) became bluetoothle.subscribe(<address>,<serviceUuid>,<characteristicUuid>,<isNotification>, <callback>, <callback>))
+
+## NewStuff ##
+
+* added passing paramters in function call without wrapping in an object.
+* if no callback is given it will use console.log and log to console.
+* if you don't want to specify a parameter just set it to NULL, it will still use default then.
+
+### NewFunctions ##
+
+1. encodedStringToString(string) (atob alias)
+2. stringToEncodedString(string) (btoa alias)
+3. encodedStringToBits(string)   (returns bit array like this -> ['10101010','01010101'])
+4. stringToBits(string)          (returns bit array like this -> ['10101010','01010101'])
+5. bitsToEncodedString(bitArray) (returns encoded string)
+6. bitsToString(bitArray)        (returns string)
+7. bitsToBytes(bitArray)         (returns bytearray (actually charcodes) like this -> [116, 101, 115, 116])
+8. bytesToBits(byteOrCharcodeArray) (returns bit array like this -> ['10101010','01010101'])
+
 
 ## Supported platforms ##
 
@@ -187,7 +212,7 @@ https://developer.apple.com/library/mac/documentation/CoreBluetooth/Reference/CB
 Initialize Bluetooth on the device. Must be called before anything else. Callback will continuously be used whenever Bluetooth is enabled or disabled. Note: Although Bluetooth initialization could initially be successful, there's no guarantee whether it will stay enabled. Each call checks whether Bluetooth is disabled. If it becomes disabled, the user must connect to the device, start a read/write operation, etc again. If Bluetooth is disabled, you can request the user to enable it by setting the request property to true. The `request` property in the `params` argument is optional and defaults to false. Also, this function should only be called once. But if it's called subsequent times, it will return either status => enabled or error => enable.
 
 ```javascript
-bluetoothle.initialize(initializeSuccess, initializeError, params);
+bluetoothle.initialize( request, statusReceiver, onPass, onFail );
 ```
 
 ##### Params #####
@@ -195,10 +220,11 @@ bluetoothle.initialize(initializeSuccess, initializeError, params);
 * statusReceiver = true (default) / false - Should change in Bluetooth status notifications be sent.
 
 ```javascript
-{
-  "request": true,
-  "statusReceiver": false
-}
+bluetoothle.initialize( true, false, null, null );
+//{
+//  "request": true,
+//  "statusReceiver": false
+//}
 ```
 
 ##### Success #####
@@ -216,7 +242,7 @@ bluetoothle.initialize(initializeSuccess, initializeError, params);
 Enable Bluetooth on the device. Android support only.
 
 ```javascript
-bluetoothle.enable(enableSuccess, enableError);
+bluetoothle.enable( onPass, onFail );
 ```
 
 ##### Error #####
@@ -232,7 +258,7 @@ The successCallback isn't actually used. Listen to initialize callbacks for chan
 Disable Bluetooth on the device. Android support only.
 
 ```javascript
-bluetoothle.disable(disableSuccess, disableError);
+bluetoothle.disable( onPass, onFail );
 ```
 
 ##### Error #####
@@ -248,7 +274,7 @@ The successCallback isn't actually used. Listen to initialize callbacks for chan
 Scan for Bluetooth LE devices. Since scanning is expensive, stop as soon as possible. The Cordova app should use a timer to limit the scan interval. Also, Android uses an AND operator for filtering, while iOS uses an OR operator.
 
 ```javascript
-bluetoothle.startScan(startScanSuccess, startScanError, params);
+bluetoothle.startScan( serviceUuids, allowDuplicates, onPass, onFail );
 ```
 
 ##### Params #####
@@ -256,13 +282,11 @@ bluetoothle.startScan(startScanSuccess, startScanError, params);
 * allowDuplicates = True/false to allow duplicate advertisement packets, defaults to false. iOS only
 
 ```javascript
-{
-  "serviceUuids": [
-    "180D",
-    "180F"
-  ],
-  allowDuplicates: true
-}
+bluetoothle.startScan( ["180D","180F"], true, null, null );
+//{
+//  "serviceUuids": ["180D","180F"],
+//  allowDuplicates: true
+//}
 ```
 
 ##### Success #####
@@ -293,7 +317,7 @@ bluetoothle.startScan(startScanSuccess, startScanError, params);
 Stop scan for Bluetooth LE devices. Since scanning is expensive, stop as soon as possible. The Cordova app should use a timer to limit the scanning time.
 
 ```javascript
-bluetoothle.stopScan(stopScanSuccess, stopScanError);
+bluetoothle.stopScan( onPass, onFail );
 ```
 
 ##### Success #####
@@ -311,19 +335,17 @@ bluetoothle.stopScan(stopScanSuccess, stopScanError);
 Retrieved Bluetooth LE devices currently connected. In iOS, devices that are "paired" to will not return during a normal scan. Callback is "instant" compared to a scan. I haven't been able to get UUID filtering working on Android, so it returns all paired devices including non Bluetooth LE ones.
 
 ```javascript
-bluetoothle.retrieveConnected(retrieveConnectedSuccess, retrieveConnectedError, params);
+bluetoothle.retrieveConnected( serviceUuids, onPass, onFail );
 ```
 
 ##### Params #####
 * serviceUuids = An array of service IDs to filter the retrieval by. If no service IDs are specified, no devices will be returned! Ignored on Android
 
 ```javascript
-{
-  "serviceUuids": [
-    "180D",
-    "180F"
-  ]
-}
+bluetoothle.retrieveConnected( ["180D","180F"], null, null );
+//{
+// "serviceUuids": ["180D","180F"]
+//}
 ```
 
 ##### Success #####
@@ -346,16 +368,17 @@ An array of device objects:
 Connect to a Bluetooth LE device. The Cordova app should use a timer to limit the connecting time in case connecting is never successful. Once a device is connected, it may disconnect without user intervention. The original connection callback will be called again and receive an object with status => disconnected. To reconnect to the device, use the reconnect method. Before connecting to a new device, the current device must be disconnected and closed. If a timeout occurs, the connection attempt should be canceled using disconnect().
 
 ```javascript
-bluetoothle.connect(connectSuccess, connectError, params);
+bluetoothle.connect( address, onPass, onFail );
 ```
 
 ##### Params #####
 * address = The address/identifier provided by the scan's return object
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
-}
+bluetoothle.connect( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", null, null );
+//{
+// "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
+//}
 ```
 
 ##### Success #####
@@ -389,17 +412,17 @@ bluetoothle.connect(connectSuccess, connectError, params);
 Reconnect to a previously connected Bluetooth device. The Cordova app should use a timer to limit the connecting time. If a timeout occurs, the reconnection attempt should be canceled using disconnect().
 
 ```javascript
-bluetoothle.reconnect(reconnectSuccess, reconnectError, params);
+bluetoothle.reconnect( address, onPass, onFail );
 ```
 
 ##### Params #####
 * address = The address/identifier provided by the scan's return object
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
-}
-```
+bluetoothle.reconnect( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
+//}```
 
 ##### Success #####
 * status => connecting = Beginning to connect
@@ -431,17 +454,17 @@ bluetoothle.reconnect(reconnectSuccess, reconnectError, params);
 Disconnect from a Bluetooth LE device.
 
 ```javascript
-bluetoothle.disconnect(disconnectSuccess, disconnectError, params);
+bluetoothle.disconnect( address, onPass, onFail );
 ```
 
 ##### Params #####
 * address = The address/identifier provided by the scan's return object
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
-}
-```
+bluetoothle.disconnect( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
+//}```
 
 ##### Success #####
 * status => disconnecting = Beginning to disconnect
@@ -466,16 +489,17 @@ bluetoothle.disconnect(disconnectSuccess, disconnectError, params);
 Close/dispose a Bluetooth LE device. Must disconnect before closing.
 
 ```javascript
-bluetoothle.close(closeSuccess, closeError, params);
+bluetoothle.close( address, onPass, onFail );
 ```
 
 ##### Params #####
 * address = The address/identifier provided by the scan's return object
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
-}
+bluetoothle.close( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
+//}
 ```
 
 ##### Success #####
@@ -495,16 +519,17 @@ bluetoothle.close(closeSuccess, closeError, params);
 Discover all the devices services, characteristics and descriptors. Doesn't need to be called again after disconnecting and then reconnecting. If using iOS, you shouldn't use discover and services/characteristics/descriptors on the same device.
 
 ```javascript
-bluetoothle.discover(discoverSuccess, discoverError, params);
+bluetoothle.discover( address, onPass, onFail );
 ```
 
 ##### Params #####
 * address = The address/identifier provided by the scan's return object
 
 ```javascript
-{
-  "address": "00:22:D0:3B:32:10"
-}
+bluetoothle.discover( "00:22:D0:3B:32:10", null, null );
+//{
+//  "address": "00:22:D0:3B:32:10"
+//}
 ```
 
 ##### Return #####
@@ -537,7 +562,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a00",
+          "characteristicUuid": "2a00", // [Device Name](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.gap.device_name.xml)
           "properties": {
             "write": true,
             "writeWithoutResponse": true,
@@ -548,7 +573,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a01",
+          "characteristicUuid": "2a01", // [Appearance](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.gap.appearance.xml)
           "properties": {
             "read": true
           }
@@ -557,7 +582,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a02",
+          "characteristicUuid": "2a02", // [Peripheral Privacy Flag](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.gap.peripheral_privacy_flag.xml)
           "properties": {
             "read": true
           }
@@ -566,7 +591,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a03",
+          "characteristicUuid": "2a03", // [Reconnection Address](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.gap.reconnection_address.xml)
           "properties": {
             "write": true
           }
@@ -575,13 +600,13 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a04",
+          "characteristicUuid": "2a04", // [Pheripheral Preferred Connection Parameters](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.gap.peripheral_preferred_connection_parameters.xml)
           "properties": {
             "read": true
           }
         }
       ],
-      "serviceUuid": "1800"
+      "serviceUuid": "1800" // [Generic Access](https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.generic_access.xml)
     },
     {
       "characteristics": [
@@ -591,13 +616,13 @@ Descriptor Object:
               "descriptorUuid": "2902"
             }
           ],
-          "characteristicUuid": "2a05",
+          "characteristicUuid": "2a05", // [Service Changed](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.gatt.service_changed.xml)
           "properties": {
             "indicate": true
           }
         }
       ],
-      "serviceUuid": "1801"
+      "serviceUuid": "1801" // [Generic Attribute](https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.generic_attribute.xml)
     },
     {
       "characteristics": [
@@ -607,7 +632,7 @@ Descriptor Object:
               "descriptorUuid": "2902"
             }
           ],
-          "characteristicUuid": "2a37",
+          "characteristicUuid": "2a37", // [Heart Rate Measurement](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml)
           "properties": {
             "notify": true
           }
@@ -616,13 +641,13 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a38",
+          "characteristicUuid": "2a38", // [Body Sensor Location](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.body_sensor_location.xml)
           "properties": {
             "read": true
           }
         }
       ],
-      "serviceUuid": "180d"
+      "serviceUuid": "180d" // [Heart Rate](https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.heart_rate.xml)
     },
     {
       "characteristics": [
@@ -630,7 +655,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a23",
+          "characteristicUuid": "2a23", // [System ID](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.system_id.xml)
           "properties": {
             "read": true
           }
@@ -639,7 +664,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a24",
+          "characteristicUuid": "2a24", // [Model Number String](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.model_number_string.xml)
           "properties": {
             "read": true
           }
@@ -648,7 +673,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a25",
+          "characteristicUuid": "2a25", // [Serial Number String](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.serial_number_string.xml)
           "properties": {
             "read": true
           }
@@ -657,7 +682,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a26",
+          "characteristicUuid": "2a26", // [Firmware Revision String](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.firmware_revision_string.xml)
           "properties": {
             "read": true
           }
@@ -666,7 +691,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a27",
+          "characteristicUuid": "2a27", // [hardware Revision String](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.hardware_revision_string.xml)
           "properties": {
             "read": true
           }
@@ -675,7 +700,7 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a28",
+          "characteristicUuid": "2a28", // [Software Revision String](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.software_revision_string.xml)
           "properties": {
             "read": true
           }
@@ -684,13 +709,13 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a29",
+          "characteristicUuid": "2a29", // [Manufacturer Name String](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.manufacturer_name_string.xml)
           "properties": {
             "read": true
           }
         }
       ],
-      "serviceUuid": "180a"
+      "serviceUuid": "180a" // [Device Information](https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.device_information.xml)
     },
     {
       "characteristics": [
@@ -698,13 +723,13 @@ Descriptor Object:
           "descriptors": [
 
           ],
-          "characteristicUuid": "2a19",
+          "characteristicUuid": "2a19", // [Battery Level](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml)
           "properties": {
             "read": true
           }
         }
       ],
-      "serviceUuid": "180f"
+      "serviceUuid": "180f" // [Battery Service](https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.battery_service.xml)
     },
     {
       "characteristics": [
@@ -743,7 +768,7 @@ Descriptor Object:
 Discover the device's services. Not providing an array of services will return all services and take longer to discover. iOS support only.
 
 ```javascript
-bluetoothle.services(servicesSuccess, servicesError, params);
+bluetoothle.services( address, serviceUuids, onPass, onFail );
 ```
 
 ##### Params #####
@@ -751,12 +776,11 @@ bluetoothle.services(servicesSuccess, servicesError, params);
 * serviceUuids = An array of service IDs to filter the scan or empty array / null
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "serviceUuids": [
-
-  ]
-}
+bluetoothle.services( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", [], null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "serviceUuids": []
+//}
 ```
 
 ##### Success #####
@@ -783,7 +807,7 @@ bluetoothle.services(servicesSuccess, servicesError, params);
 Discover the service's characteristics. Not providing an array of characteristics will return all characteristics and take longer to discover. iOS support only.
 
 ```javascript
-bluetoothle.characteristics(characteristicsSuccess, characteristicsError, params);
+bluetoothle.characteristics( address, serviceUuid, characteristicUuids, onPass, onFail );
 ```
 
 ##### Params #####
@@ -792,13 +816,12 @@ bluetoothle.characteristics(characteristicsSuccess, characteristicsError, params
 * characteristicUuids = An array of characteristic IDs to discover or empty array / null
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "serviceUuid": "180d",
-  "characteristicUuids": [
-
-  ]
-}
+bluetoothle.characteristics( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", "180d", [], null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "serviceUuid": "180d",
+//  "characteristicUuids": []
+//}
 ```
 
 ##### Success #####
@@ -837,7 +860,7 @@ bluetoothle.characteristics(characteristicsSuccess, characteristicsError, params
 Discover the characteristic's descriptors. iOS support only.
 
 ```javascript
-bluetoothle.descriptors(descriptorsSuccess, descriptorsError, params);
+bluetoothle.descriptors( address, serviceUuid, characteristicUuid, onPass, onFail );
 ```
 
 ##### Params #####
@@ -846,11 +869,12 @@ bluetoothle.descriptors(descriptorsSuccess, descriptorsError, params);
 * characteristicUuids = The characteristic's ID
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "serviceUuid": "180d",
-  "characteristicUuid": "2a37"
-}
+bluetoothle.descriptors( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", "180d", "2a37", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "serviceUuid": "180d",
+//  "characteristicUuid": "2a37"
+//}
 ```
 
 ##### Success #####
@@ -878,7 +902,7 @@ bluetoothle.descriptors(descriptorsSuccess, descriptorsError, params);
 Read a particular service's characteristic once.
 
 ```javascript
-bluetoothle.read(readSuccess, readError, params);
+bluetoothle.read( address, serviceUuid, characteristicUuid, onPass, onFail );
 ```
 
 ##### Params #####
@@ -887,11 +911,12 @@ bluetoothle.read(readSuccess, readError, params);
 * characteristicUuid = The characteristic's ID
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "serviceUuid": "180d",
-  "characteristicUuid": "2a38"
-}
+bluetoothle.read( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", "180d", "2a38", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "serviceUuid": "180d",
+//  "characteristicUuid": "2a38"
+//}
 ```
 
 ##### Success #####
@@ -916,7 +941,7 @@ bluetoothle.read(readSuccess, readError, params);
 Subscribe to a particular service's characteristic. Once a subscription is no longer needed, execute unsubscribe in a similar fashion. The Client Configuration descriptor will automatically be written to enable notification/indication.
 
 ```javascript
-bluetoothle.subscribe(subscribeSuccess, subscribeError, params);
+bluetoothle.subscribe( address, serviceUuid, characteristicUuid, isNotification, onPass, onFail );
 ```
 
 ##### Params #####
@@ -926,12 +951,13 @@ bluetoothle.subscribe(subscribeSuccess, subscribeError, params);
 * isNotification is only required on Android. True (or null) means notification will be enabled. False means indication will be enabled.
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "serviceUuid": "180d",
-  "characteristicUuid": "2a37",
-  "isNotification" : true
-}
+bluetoothle.subscribe( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", "180d", "2a37", true, null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "serviceUuid": "180d",
+//  "characteristicUuid": "2a37",
+//  "isNotification" : true
+//}
 ```
 
 ##### Success #####
@@ -966,7 +992,7 @@ bluetoothle.subscribe(subscribeSuccess, subscribeError, params);
 Unsubscribe to a particular service's characteristic.
 
 ```javascript
-bluetoothle.unsubscribe(unsubscribeSuccess, unsubscribeError, params);
+bluetoothle.subscribe( address, serviceUuid, characteristicUuid, onPass, onFail );
 ```
 
 ##### Params #####
@@ -975,11 +1001,12 @@ bluetoothle.unsubscribe(unsubscribeSuccess, unsubscribeError, params);
 * characteristicUuid = The characteristic's ID
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "serviceUuid": "180d",
-  "characteristicUuid": "2a37"
-}
+bluetoothle.subscribe( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", "180d", "2a37", true, null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "serviceUuid": "180d",
+//  "characteristicUuid": "2a37"
+//}
 ```
 
 ##### Success #####
@@ -1003,19 +1030,21 @@ bluetoothle.unsubscribe(unsubscribeSuccess, unsubscribeError, params);
 Write a particular service's characteristic.
 
 ```javascript
-bluetoothle.write(writeSuccess, writeError, params);
+bluetoothle.write( string, serviceUuid, characteristicUuid, type, onPass, onFail );
 ```
 
 ##### Params #####
-Value is a base64 encoded string of bytes to write. Use bluetoothle.bytesToEncodedString(bytes) to convert to base64 encoded string from a unit8Array.
+You don't need to base64 encode the string
 To write without response, set type to "noResponse". Any other value will default to write with response. Note, no callback will occur on write without response.
 ```javascript
-var string = "Hello World";
-var bytes = bluetoothle.stringToBytes(string);
-var encodedString = bluetoothle.bytesToEncodedString(encodedString);
-
+bluetoothle.write( string, serviceUuid, characteristicUuid, type, onPass, onFail );
 //Note, this example doesn't actually work since it's read only characteristic
-{"value":encodedString,"serviceUuid":"180F","characteristicUuid":"2A19","type":"noResponse"}
+//{
+//  "value":btoa("hello world!"),
+//  "serviceUuid":"180F",
+//  "characteristicUuid":"2A19",
+//  "type":"noResponse"
+//}
 ```
 
 ##### Success #####
@@ -1033,7 +1062,7 @@ var string = bluetoothle.bytesToString(bytes); //This should equal Hello World!
 Read a particular characterist's descriptor
 
 ```javascript
-bluetoothle.read(readDescriptorSuccess, readDescriptorError, params);
+bluetoothle.readDescriptor( address, serviceUuid, characteristicUuid, descriptorUuid, onPass, onFail );
 ```
 
 ##### Params #####
@@ -1043,12 +1072,13 @@ bluetoothle.read(readDescriptorSuccess, readDescriptorError, params);
 * descriptorUuid = The descriptor's ID
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "serviceUuid": "180d",
-  "characteristicUuid": "2a37",
-  "descriptorUuid": "2902"
-}
+bluetoothle.readDescriptor( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", "180d", "2a37", "2902", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "serviceUuid": "180d",
+//  "characteristicUuid": "2a37",
+//  "descriptorUuid": "2902"
+//}
 ```
 
 ##### Success #####
@@ -1076,18 +1106,20 @@ bluetoothle.read(readDescriptorSuccess, readDescriptorError, params);
 Write a particular characteristic's descriptor. Unable to write characteristic configuration directly to keep in line with iOS implementation. Instead use subscribe/unsubscribe, which will automatically enable/disable notification. ***Note, limited testing and likely needs to be made more generic***
 
 ```javascript
-bluetoothle.writeDescriptor(writeDescriptorSuccess, writeDescriptorError, params);
+bluetoothle.writeDescriptor( string, serviceUuid, characteristicUuid, descriptorUuid, onPass, onFail );
 ```
 
 ##### Params #####
-Value is a base64 encoded string of bytes to write. Use bluetoothle.bytesToEncodedString(bytes) to convert to base64 encoded string from a unit8Array.
+you don't need to base64 encode string. Use bluetoothle.bytesToEncodedString(bytes) to convert to base64 encoded string from a unit8Array.
 
 ```javascript
-var string = "Hello World";
-var bytes = bluetoothle.stringToBytes(string);
-var encodedString = bluetoothle.bytesToEncodedString(encodedString);
-
-{"serviceUuid":"180D","characteristicUuid":"2A37","descriptorUuid":"2902","value":encodedString}
+bluetoothle.writeDescriptor( "hello world!", "180D", "2A37", "2902", null, null );
+//{
+//  "serviceUuid":"180D",
+//  "characteristicUuid":"2A37",
+//  "descriptorUuid":"2902",
+//  "value":btoa("hello world!")
+//}
 ```
 
 ##### Success #####
@@ -1105,16 +1137,17 @@ var string = bluetoothle.bytesToString(bytes); //This should equal Hello World!
 Read RSSI of a connected device. RSSI is also returned with scanning.
 
 ```javascript
-bluetoothle.rssi(rssiSuccess, rssiError, params);
+bluetoothle.rssi( address, onPass, onFail );
 ```
 
 #### Params ####
 * address = The address/identifier provided by the scan's return object
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
-}
+bluetoothle.rssi( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
+//}
 ```
 
 ##### Success #####
@@ -1135,7 +1168,7 @@ bluetoothle.rssi(rssiSuccess, rssiError, params);
 Set MTU of a connected device. Android only.
 
 ```javascript
-bluetoothle.mtu(mtuSuccess, mtuError, params);
+bluetoothle.mtu( address, mtu, onPass, onFail );
 ```
 
 #### Params ####
@@ -1143,10 +1176,11 @@ bluetoothle.mtu(mtuSuccess, mtuError, params);
 * mtu - Integer value mtu should be set to
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "mtu" : 50
-}
+mtu( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", 50, null, null )
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "mtu" : 50
+//}
 ```
 
 ##### Success #####
@@ -1165,10 +1199,10 @@ bluetoothle.mtu(mtuSuccess, mtuError, params);
 
 
 ### isInitialized ###
-Determine whether the adapter is initialized. No error callback. Returns true or false
+Determine whether the adapter is initialized. Returns true or false
 
 ```javascript
-bluetoothle.isInitialized(isInitialized);
+bluetoothle.isInitialized( onPass, onFail );
 ```
 
 ##### Success Return #####
@@ -1182,10 +1216,10 @@ bluetoothle.isInitialized(isInitialized);
 
 
 ### isEnabled ###
-Determine whether the adapter is enabled. No error callback
+Determine whether the adapter is enabled.
 
 ```javascript
-bluetoothle.isEnabled(isEnabled);
+bluetoothle.isEnabled( onPass, onFail );
 ```
 
 ##### Success #####
@@ -1200,10 +1234,10 @@ bluetoothle.isEnabled(isEnabled);
 
 
 ### isScanning ###
-Determine whether the adapter is initialized. No error callback. Returns true or false
+Determine whether the adapter is initialized. Returns true or false
 
 ```javascript
-bluetoothle.isScanning(isScanning);
+bluetoothle.isScanning( onPass, onFail );
 ```
 
 ##### Return #####
@@ -1221,16 +1255,17 @@ bluetoothle.isScanning(isScanning);
 Determine whether the device is connected, or error if not initialized or never connected to device.
 
 ```javascript
-bluetoothle.isConnected(isConnectedSuccess, isConnectedError, params);
+bluetoothle.isConnected( address, onPass, onFail );
 ```
 
 #### Params ####
 * address = The address/identifier provided by the scan's return object
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
-}
+bluetoothle.isConnected( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
+//}
 ```
 
 ##### Success #####
@@ -1250,16 +1285,17 @@ bluetoothle.isConnected(isConnectedSuccess, isConnectedError, params);
 Determine whether the device's characteristics and descriptors have been discovered, or error if not initialized or never connected to device.
 
 ```javascript
-bluetoothle.isDiscovered(isDiscoveredSuccess, isDiscoveredError, params);
+bluetoothle.isDiscovered( address, onPass, onFail );
 ```
 
 #### Params ####
 * address = The address/identifier provided by the scan's return object
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
-}
+bluetoothle.isDiscovered( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63"
+//}
 ```
 
 ##### Success #####
@@ -1279,7 +1315,7 @@ bluetoothle.isDiscovered(isDiscoveredSuccess, isDiscoveredError, params);
 Request a change in the connection priority to improve throughput when transfer large amounts of data via BLE. Android support only. iOS will return error.
 
 ```javascript
-bluetoothle.requestConnectionPriority(success, error, params);
+bluetoothle.requestConnectionPriority( address, connectionPriority, onPass, onFail );
 ```
 
 #### Params ####
@@ -1287,10 +1323,11 @@ bluetoothle.requestConnectionPriority(success, error, params);
 * connectionPriority = low / balanced / high
 
 ```javascript
-{
-  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
-  "connectionPriority" : "balanced"
-}
+bluetoothle.requestConnectionPriority( "ECC037FD-72AE-AFC5-9213-CA785B3B5C63", "balanced", null, null );
+//{
+//  "address": "ECC037FD-72AE-AFC5-9213-CA785B3B5C63",
+//  "connectionPriority" : "balanced"
+//}
 ```
 
 ##### Success #####
@@ -1322,6 +1359,41 @@ bluetoothle.bytesToEncodedString(bytes);
 ```
 
 
+### encodedStringToString ###
+atob alias
+
+```javascript
+bluetoothle.encodedStringToString(string);
+```
+
+
+
+### stringToEncodedString ###
+btoa alias
+
+```javascript
+bluetoothle.stringToEncodedString(bytes);
+```
+
+
+
+### stringToBits ###
+Helper function to convert a string to bits.
+
+```javascript
+bluetoothle.stringToBits(string);
+```
+
+
+
+### bitsToString ###
+Helper function to convert bits to a string.
+
+```javascript
+bluetoothle.bitsToString(bits);
+```
+
+
 
 ### stringToBytes ###
 Helper function to convert a string to bytes.
@@ -1339,6 +1411,8 @@ Helper function to convert bytes to a string.
 bluetoothle.bytesToString(bytes);
 ```
 
+#### for other string/encodedString/bit/byte functions scroll to top and look for new methods ####
+
 
 
 ## Example ##
@@ -1350,70 +1424,19 @@ bluetoothle.bytesToString(bytes);
 
 ## Data Parsing Example ##
 ```javascript
-if (obj.status == "subscribedResult")
-{
-  //Turn the base64 string into an array of unsigned 8bit integers
-  var bytes = bluetoothle.encodedStringToBytes(obj.value);
-  if (bytes.length === 0)
-  {
-    return;
-  }
-
-  //NOTE: Follow along to understand how the parsing works
-  //https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
-
-  //First byte provides instructions on what to do with the remaining bytes
-  var flag = bytes[0];
-
-  //Offset from beginning of the array
-  var offset = 1;
-
-  //If the first bit of the flag is set, the HR is in 16 bit form
-  if ((flag & 0x01) == 1)
-  {
-      //Extract second and third bytes and convert to 16bit unsigned integer
-      var u16bytesHr = bytes.buffer.slice(offset, offset + 2);
-      var u16Hr = new Uint16Array(u16bytesHr)[0];
-      //16 bits takes up 2 bytes, so increase offset by two
-      offset += 2;
-  }
-  //Else the HR is in 8 bit form
-  else
-  {
-      //Extract second byte and convert to 8bit unsigned integer
-      var u8bytesHr = bytes.buffer.slice(offset, offset + 1);
-      var u8Hr = new Uint8Array(u8bytesHr)[0];
-
-      //Or I believe I could just do this: var u8Hr = u8bytesHr[offset]
-
-      //8 bits takes up 1 byte, so increase offset by one
-      offset += 1;
-  }
-
-  //NOTE: I'm ignoring the second and third bit because I'm not interested in the sensor contact, and it doesn't affect the offset
-
-  //If the fourth bit is set, increase the offset to skip over the energy expended information
-  if ((flag & 0x08) == 8)
-  {
-      offset += 2;
-  }
-
-  //If the fifth bit is set, get the RR interval(s)
-  if ((flag & 0x10) == 16)
-  {
-      //Number of rr intervals
-      var rrCount = (bytes.length - offset) / 2;
-
-      for (var i = rrCount - 1; i >= 0; i--)
-      {
-          //Cast to 16 bit unsigned int
-          var u16bytesRr = bytes.buffer.slice(offset, offset + 2);
-          var u16Rr = new Uint16Array(u16bytesRr)[0];
-          //Increase offset
-          offset += 2;
-      }
-  }
+function encodedStringToHrObject(e){
+  return{
+    hr:atob(e).charCodeAt(0)&1?atob(e).charCodeAt(2)+atob(e).charCodeAt(1)*256:atob(e).charCodeAt(1),
+    rr:atob(e).charCodeAt(atob(e).length-1)+atob(e).charCodeAt(atob(e).length-2)*256,
+    scs:atob(e).charCodeAt(0)&6?(atob(e).charCodeAt(0)&2?'':'no')+'contact':'unsupported'
+  };
 }
+//returns object
+//{
+//  hr:119,
+//  rr:4086,
+//  scs:'contact' //sensor contact status, returns contact or nocontant or unsupported
+//}
 ```
 
 
