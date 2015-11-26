@@ -10,6 +10,7 @@
   <license>Apache 2.0</license>
   <js-module src="www/bluetoothle.js" name="BluetoothLe">
     <clobbers target="window.bluetoothle" />
+    <clobbers target="window.ble" />
   </js-module>
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
