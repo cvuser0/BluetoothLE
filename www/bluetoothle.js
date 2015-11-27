@@ -1,123 +1,121 @@
-var bluetoothleName = "BluetoothLePlugin";
 var bluetoothle = {
-    log( log )
+    log                      : function( log )
     {
-        console.log( log );
-        this.initialize()
+        console.log( log )
     },
-    initialize( request, statusReceiver, onPass, onFail )
+    initialize               : function( request, statusReceiver, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "initialize", [ { request: request || true, statusReceiver: statusReceiver || true } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "initialize", [ { request: request || true, statusReceiver: statusReceiver || true } ] );
     },
-    enable( onPass, onFail )
+    enable                   : function( onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "enable", [] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "enable", [] );
     },
-    disable( onPass, onFail )
+    disable                  : function( onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "disable", [] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "disable", [] );
     },
-    startScan( serviceUuids, allowDuplicates, onPass, onFail )
+    startScan                : function( serviceUuids, allowDuplicates, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "startScan", [ { serviceUuids: serviceUuids || [], allowDuplicates: allowDuplicates || false } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "startScan", [ { serviceUuids: serviceUuids || [], allowDuplicates: allowDuplicates || false } ] );
     },
-    stopScan( onPass, onFail )
+    stopScan                 : function( onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "stopScan", [] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "stopScan", [] );
     },
-    retrieveConnected( serviceUuids, onPass, onFail )
+    retrieveConnected        : function( serviceUuids, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "retrieveConnected", [ { serviceUuids: serviceUuids || [] } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "retrieveConnected", [ { serviceUuids: serviceUuids || [] } ] );
     },
-    connect( address, onPass, onFail )
+    connect                  : function( address, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "connect", [ { address: address || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "connect", [ { address: address || '' } ] );
     },
-    reconnect( address, onPass, onFail )
+    reconnect                : function( address, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "reconnect", [ { address: address || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "reconnect", [ { address: address || '' } ] );
     },
-    disconnect( address, onPass, onFail )
+    disconnect               : function( address, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "disconnect", [ { address: address || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "disconnect", [ { address: address || '' } ] );
     },
-    close( address, onPass, onFail )
+    close                    : function( address, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "close", [ { address: address || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "close", [ { address: address || '' } ] );
     },
-    discover( address, onPass, onFail )
+    discover                 : function( address, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "discover", [ { address: address || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "discover", [ { address: address || '' } ] );
     },
-    services( address, serviceUuids, onPass, onFail )
+    services                 : function( address, serviceUuids, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "services", [ { address: address || '', serviceUuids: serviceUuids || [] } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "services", [ { address: address || '', serviceUuids: serviceUuids || [] } ] );
     },
-    characteristics( address, serviceUuid, characteristicUuids, onPass, onFail )
+    characteristics          : function( address, serviceUuid, characteristicUuids, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "characteristics", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuids: characteristicUuids || [] } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "characteristics", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuids: characteristicUuids || [] } ] );
     },
-    descriptors( address, serviceUuid, characteristicUuid, onPass, onFail )
+    descriptors              : function( address, serviceUuid, characteristicUuid, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "descriptors", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "descriptors", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '' } ] );
     },
-    read( address, serviceUuid, characteristicUuid, onPass, onFail )
+    read                     : function( address, serviceUuid, characteristicUuid, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "read", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "read", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '' } ] );
     },
-    subscribe( address, serviceUuid, characteristicUuid, isNotification, onPass, onFail )
+    subscribe                : function( address, serviceUuid, characteristicUuid, isNotification, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "subscribe", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '', isNotification: isNotification || true } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "subscribe", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '', isNotification: isNotification || true } ] );
     },
-    unsubscribe( address, serviceUuid, characteristicUuid, onPass, onFail )
+    unsubscribe              : function( address, serviceUuid, characteristicUuid, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "unsubscribe", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "unsubscribe", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '' } ] );
     },
-    write( string, serviceUuid, characteristicUuid, type, onPass, onFail )
+    write                    : function( string, serviceUuid, characteristicUuid, type, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "write", [ { value: atob( string || '' ), serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '', type: type || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "write", [ { value: atob( string || '' ), serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '', type: type || '' } ] );
     },
-    readDescriptor( address, serviceUuid, characteristicUuid, descriptorUuid, onPass, onFail )
+    readDescriptor           : function( address, serviceUuid, characteristicUuid, descriptorUuid, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "readDescriptor", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: serviceUuid || '', descriptorUuid: descriptorUuid || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "readDescriptor", [ { address: address || '', serviceUuid: serviceUuid || '', characteristicUuid: serviceUuid || '', descriptorUuid: descriptorUuid || '' } ] );
     },
-    writeDescriptor( string, serviceUuid, characteristicUuid, descriptorUuid, onPass, onFail )
+    writeDescriptor          : function( string, serviceUuid, characteristicUuid, descriptorUuid, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "writeDescriptor", [ { value: atob( string || '' ), serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '', descriptorUuid: descriptorUuid || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "writeDescriptor", [ { value: atob( string || '' ), serviceUuid: serviceUuid || '', characteristicUuid: characteristicUuid || '', descriptorUuid: descriptorUuid || '' } ] );
     },
-    rssi( address, onPass, onFail )
+    rssi                     : function( address, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "rssi", [ { address: address || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "rssi", [ { address: address || '' } ] );
     },
-    mtu( address, mtu, onPass, onFail )
+    mtu                      : function( address, mtu, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "mtu", [ { address: address || '', mtu: mtu || 0 } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "mtu", [ { address: address || '', mtu: mtu || 0 } ] );
     },
-    isInitialized( onPass, onFail )
+    isInitialized            : function( onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "isInitialized", [] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "isInitialized", [] );
     },
-    isEnabled( onPass, onFail )
+    isEnabled                : function( onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "isEnabled", [] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "isEnabled", [] );
     },
-    isScanning( onPass, onFail )
+    isScanning               : function( onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "isScanning", [] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "isScanning", [] );
     },
-    isConnected( address, onPass, onFail )
+    isConnected              : function( address, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "isConnected", [ { address: address || '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "isConnected", [ { address: address || '' } ] );
     },
-    isDiscovered( address, onPass, onFail )
+    isDiscovered             : function( address, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "isDiscovered", [ { address: address | '' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "isDiscovered", [ { address: address | '' } ] );
     },
-    requestConnectionPriority( address, connectionPriority, onPass, onFail )
+    requestConnectionPriority: function( address, connectionPriority, onPass, onFail )
     {
-        cordova.exec( onPass || log, onFail || log, "BluetoothLePlugin", "requestConnectionPriority", [ { address: address || '', connectionPriority: connectionPriority || 'balanced' } ] );
+        cordova.exec( onPass || this.log, onFail || this.log, "BluetoothLePlugin", "requestConnectionPriority", [ { address: address || '', connectionPriority: connectionPriority || 'balanced' } ] );
     },
-    encodedStringToBytes( string )
+    encodedStringToBytes     : function( string )
     {
         var data = atob( string );
         var bytes = new Uint8Array( data.length );
@@ -126,39 +124,39 @@ var bluetoothle = {
         }
         return bytes;
     },
-    bytesToEncodedString( bytes )
+    bytesToEncodedString     : function( bytes )
     {
         return btoa( String.fromCharCode.apply( null, bytes ) );
     },
-    encodedStringToString: atob,
-    stringToEncodedString: btoa,
-    encodedStringToBits( string )
+    encodedStringToString    : atob,
+    stringToEncodedString    : btoa,
+    encodedStringToBits      : function( string )
     {
         var o = [];
         for ( var d = 0; d < atob( string ).length; d++ )o.push( atob( string ).charCodeAt( d ).toString( 2 ) );
         for ( var b = 0; b < o.length; b++ )while ( o[ b ].length % 8 )o[ b ] = '0' + o[ b ];
         return o;
     },
-    stringToBits( string )
+    stringToBits             : function( string )
     {
         var o = [];
         for ( var d = 0; d < string.length; d++ )o.push( string.charCodeAt( d ).toString( 2 ) );
         for ( var b = 0; b < o.length; b++ )while ( o[ b ].length % 8 )o[ b ] = '0' + o[ b ];
         return o;
     },
-    bitsToEncodedString( bits )
+    bitsToEncodedString      : function( bits )
     {
         var string = '';
-        for ( var i in bits ) string += String.fromCharCode( parseInt( i, 2 ) );
+        for ( var i = 0; i < bits.length; i++ ) string += String.fromCharCode( parseInt( bits[i], 2 ) );
         return btoa( string );
     },
-    bitsToString( bits )
+    bitsToString             : function( bits )
     {
         var string = '';
-        for ( var i in bits ) string += String.fromCharCode( parseInt( i, 2 ) );
+        for ( var i = 0; i < bits.length; i++ ) string += String.fromCharCode( parseInt( bits[i], 2 ) );
         return string;
     },
-    stringToBytes( string )
+    stringToBytes            : function( string )
     {
         var bytes = new ArrayBuffer( string.length * 2 );
         var bytesUint16 = new Uint16Array( bytes );
@@ -167,22 +165,17 @@ var bluetoothle = {
         }
         return new Uint8Array( bytesUint16 );
     },
-    bytesToString( bytes )
+    bytesToString            : function( bytes )
     {
         return String.fromCharCode.apply( null, new Uint16Array( bytes ) );
     },
-    bitsToBytes( bits )
+    bitsToBytes              : function( bits )
     {
-        var string = '';
-        for ( var i in bits ) string += String.fromCharCode( parseInt( i, 2 ) );
-        var bytes = new ArrayBuffer( string.length * 2 );
-        var bytesUint16 = new Uint16Array( bytes );
-        for ( var i = 0; i < string.length; i++ ) {
-            bytesUint16[ i ] = string.charCodeAt( i );
-        }
-        return new Uint8Array( bytesUint16 );
+        var bytes = [];
+        for ( var i = 0; i < bits.length; i++ )bytes.push( parseInt( bits[ i ], 2 ) );
+        return bytes;
     },
-    bytesToBits( bytes )
+    bytesToBits              : function( bytes )
     {
         var string = String.fromCharCode.apply( null, new Uint16Array( bytes ) );
         var o = [];
