@@ -128,8 +128,14 @@ var bluetoothle = {
         {
             return btoa( String.fromCharCode.apply( null, bytes ) );
         },
-        encodedStringToString    : atob,
-        stringToEncodedString    : btoa,
+        encodedStringToString    : function( string )
+        {
+            return atob( string );
+        },
+        stringToEncodedString    : function( string )
+        {
+                return btoa( string );
+        },
         encodedStringToBits      : function( string )
         {
             var o = [];
